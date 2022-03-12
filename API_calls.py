@@ -1,10 +1,12 @@
 
+from doctest import master
 import pprint
 from collections import defaultdict
 from datetime import datetime
 from secrets import API_TOKEN, course_codes
 
 import pytz
+import re
 import requests
 
 url = f"https://uiowa.instructure.com/api/v1/courses/181937/assignments?access_token={API_TOKEN}"
@@ -62,8 +64,20 @@ def get_to_dos(course_codes):
 
     return to_do
 
+def clean_input(response_dictionary: dict):
+    master_assignments = {}
+
+    for course in course_codes.keys():
+        full_output = response_dictionary[course]
+        master_assignments.update({course: (full_output.keys(), full_output.values())})
+    for key, value in master_assignments.items():
+        pass
+    
+    return str(master_assignments)
+    
+
 
 if __name__ == "__main__":
     to_dos = get_to_dos(course_codes=course_codes)
-
-    pprint.pprint(to_dos)
+    
+            
