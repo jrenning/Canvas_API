@@ -10,7 +10,6 @@ import requests
 
 def get_calender_links() -> dict:
 
-
     url = f"https://uiowa.instructure.com/api/v1/courses?access_token={API_TOKEN}"
     response = requests.get(url).json()
     links = {}

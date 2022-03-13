@@ -156,3 +156,6 @@ secrets.py
 
 # ignore testing file 
 test.py
+
+# ignore vscode 
+.vscode/
