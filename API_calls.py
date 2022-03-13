@@ -65,19 +65,28 @@ def get_to_dos(course_codes):
     return to_do
 
 def clean_input(response_dictionary: dict):
-    master_assignments = {}
-
+    master_assignments_dict = {}
+    
+    
     for course in course_codes.keys():
         full_output = response_dictionary[course]
-        master_assignments.update({course: (full_output.keys(), full_output.values())})
-    for key, value in master_assignments.items():
-        pass
+        values = [*full_output.values()]
+        master_assignments_dict.update({course: values})
     
-    return str(master_assignments)
+    formatted_output = str(master_assignments_dict)
+    formatted_output = re.sub('{', '', formatted_output)
+    formatted_output = re.sub("}", "", formatted_output)
+    formatted_output = re.sub("'", "", formatted_output)
+    formatted_output = re.sub(",", "\n", formatted_output)
+    # formatted_output = re.split(",", formatted_output)
+    
+    return formatted_output
     
 
 
 if __name__ == "__main__":
     to_dos = get_to_dos(course_codes=course_codes)
+    cleaned_output = clean_input(to_dos)
+    print(cleaned_output)
     
             
