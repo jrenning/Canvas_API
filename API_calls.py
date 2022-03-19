@@ -3,6 +3,9 @@ from secrets import API_TOKEN, course_codes
 
 import re
 import requests
+import datetime
+
+
 
 # import datetime
 # import pytz
@@ -87,21 +90,50 @@ def clean_input(response_dictionary: dict) -> str:
     for course in course_codes.keys():
         full_output = response_dictionary[course]
         values = [*full_output.values()]
-        master_assignments_dict.update({course: values})
+        keys = [full_output.keys()]
+        master_assignments_dict.update({course: [keys, values]})
+    
 
     # transform output into a string and remove unnecessary characters
     formatted_output = str(master_assignments_dict)
-    patterns = ['{','}',"'"]
+    patterns = ['{','}',"'", 'dict_keys','\[','\]','\(','\)']
 
     for pattern in patterns:
         formatted_output = re.sub(pattern, "", formatted_output)
 
     formatted_output = re.sub(",", "\n", formatted_output)
 
+    # extra space for matching iso-8 format, don't remove!!
+    formatted_list = re.split('\n ', formatted_output)
+    
+    for i, input in enumerate(formatted_list):
+        # matches on ISO-8 time formats 
+        if re.search('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?', input):
+            initial_time = datetime.datetime.strptime(input, "%Y-%m-%dT%H:%M:%S%z")
+            
+            # APi adds 5 hours to actual due date time for some reason, so this adds them back
+            initial_time = initial_time - datetime.timedelta(hours=5)
+
+            # changes to 12 hour time system
+            if initial_time.hour > 12:
+                final_time = initial_time - datetime.timedelta(hours=12)
+                new_output = final_time.strftime(' %a %b %d %H:%Mpm')
+            else:
+                new_output = initial_time.strftime(' %a %b %d %H:%Mam')
+ 
+            formatted_list[i] = new_output
+    
+    formatted_output = ' '.join(str(input) for input in formatted_list)
+    formatted_output = re.sub("(\w:) ", "\\1\n", formatted_output)
+    formatted_output = re.sub("(:\d[0-9]+am|pm) ", "\\1\n", formatted_output)
+    formatted_output = re.sub("(:\\n)  ", "\\1", formatted_output)
+    
+    print(formatted_output)
+   
     return formatted_output
 
 
 if __name__ == "__main__":
     to_dos = get_to_dos(course_codes=course_codes)
     cleaned_output = clean_input(to_dos)
-    print(cleaned_output)
+    # print(cleaned_output)
