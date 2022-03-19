@@ -23,7 +23,9 @@ for i,character in enumerate(email_message):
         count += 1
     if i % 100 > 80 and character == '\n' and count == 1:
         messages.append(email_message[j:i])
-    
+
+# add newlines to the start of each message to avoid the addition of 
+# X-CMAE envelope to the text messages
 for i, message in enumerate(messages):
     messages[i] = '\n\n\n' + message
         

@@ -98,9 +98,11 @@ def clean_input(response_dictionary: dict) -> str:
     formatted_output = str(master_assignments_dict)
     patterns = ['{','}',"'", 'dict_keys','\[','\]','\(','\)']
 
+    # takes out special characters from the output
     for pattern in patterns:
         formatted_output = re.sub(pattern, "", formatted_output)
 
+    # splits up output base on commas to get courses seperated 
     formatted_output = re.sub(",", "\n", formatted_output)
 
     # extra space for matching iso-8 format, don't remove!!
@@ -123,12 +125,18 @@ def clean_input(response_dictionary: dict) -> str:
  
             formatted_list[i] = new_output
     
+    # make the list a string 
     formatted_output = ' '.join(str(input) for input in formatted_list)
+    
+    # create new lines when it reaches the end of a subject
     formatted_output = re.sub("(\w:) ", "\\1\n", formatted_output)
+    
+    # creates a new line when it reaches the end of an assignment, using the time format 
     formatted_output = re.sub("(:\d[0-9]+am|pm) ", "\\1\n", formatted_output)
+    
+    # takes out extra spaces from lines without assignments before them 
     formatted_output = re.sub("(:\\n)  ", "\\1", formatted_output)
     
-    print(formatted_output)
    
     return formatted_output
 
