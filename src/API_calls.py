@@ -144,4 +144,4 @@ def clean_input(response_dictionary: dict) -> str:
 if __name__ == "__main__":
     to_dos = get_to_dos(course_codes=course_codes)
     cleaned_output = clean_input(to_dos)
-    # print(cleaned_output)
+    print(cleaned_output)

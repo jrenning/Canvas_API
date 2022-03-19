@@ -1,8 +1,8 @@
 import smtplib
 import ssl
 from secrets import Google_email, Google_password, phone_number, course_codes
-from API_calls import get_to_dos
-from API_calls import clean_input
+from src.API_calls import get_to_dos
+from src.API_calls import clean_input
 
 # set up gmail server parameters
 smtp = "smtp.gmail.com"
