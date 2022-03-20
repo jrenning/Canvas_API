@@ -151,11 +151,11 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# ignore api keys 
+# ignore secrets
 secrets.py
 
-# ignore testing file 
-tests/
+# ignore inits
+__init__.py
 
 # ignore vscode 
 .vscode/

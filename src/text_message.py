@@ -1,43 +1,63 @@
 import smtplib
 import ssl
-from secrets import Google_email, Google_password, phone_number, course_codes
-from src.API_calls import get_to_dos
-from src.API_calls import clean_input
+from . import secrets
+from .API_calls import get_to_dos
+from .API_calls import clean_input
+import re
 
-# set up gmail server parameters
-smtp = "smtp.gmail.com"
-port = 465
 
-# get to-do output from API_class module and cleans the output
-to_do = get_to_dos(course_codes=course_codes)
-email_message = clean_input(to_do)
 
-messages = []
-count = 0
+def split_messages(email_message: str) -> list:
+    newline_indexes = [m.start() for m in re.finditer('\\n', email_message)]
+    newline_indexes = newline_indexes[::-1]
+    messages = []
+    j = 0
+    offset = 0
 
-def split_messages(email_message):
-    # splits the messages into multiple oens to stay below the character limit on text messages 
-    for i,character in enumerate(email_message):
-        if i % 100 > 80 and character == '\n' and count == 0:
-            messages.append(email_message[0:i])
-            j = i
-            count += 1
-        if i % 100 > 80 and character == '\n' and count == 1:
+    # if index is under the 140 character limit, it contains a newline, 
+    # and is above the threshold for a new message a new message will be added
+    for i, _ in enumerate(email_message):
+        if i % 140 + offset > 100 + offset and i in newline_indexes:
+            print(f'i = {i}')
+            print(email_message[j:i])
             messages.append(email_message[j:i])
+            j = i
+            offset += 140
+    else: 
+        # adds any parts of the message that the 
+        messages.append(email_message[j:len(email_message)])
+            
     return messages
 
-messages = split_messages(email_message=email_message)
 
-# add newlines to the start of each message to avoid the addition of 
-# X-CMAE envelope to the text messages
-for i, message in enumerate(messages):
-    messages[i] = '\n\n\n' + message
-        
+ # get to-do output from API_class module and cleans the output
+to_do = get_to_dos(course_codes=secrets.course_codes)
+email_message = clean_input(to_do)
 
-# using ssl login to the gmail server and send a message 
-with smtplib.SMTP_SSL(smtp, port, context=ssl.create_default_context()) as email:
-    email.login(Google_email, Google_password)
-    # sender, receiver, message
-    for message in messages:
-        if len(message) > 1:
-            email.sendmail(Google_email, phone_number, message)
+
+
+
+
+if __name__ == '__main__':
+    
+    # set up gmail server parameters
+    smtp = "smtp.gmail.com"
+    port = 465
+
+
+
+    messages = split_messages(email_message=email_message)
+
+    # add newlines to the start of each message to avoid the addition of 
+    # X-CMAE envelope to the text messages
+    for i, message in enumerate(messages):
+        messages[i] = '\n\n\n' + message
+            
+
+    # using ssl login to the gmail server and send a message 
+    with smtplib.SMTP_SSL(smtp, port, context=ssl.create_default_context()) as email:
+        email.login(secrets.Google_email, secrets.Google_password)
+        # sender, receiver, message
+        for message in messages:
+            if len(message) > 1:
+                email.sendmail(secrets.Google_email, secrets.phone_number, message)
