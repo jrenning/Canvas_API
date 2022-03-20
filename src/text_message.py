@@ -1,8 +1,10 @@
 import smtplib
 import ssl
-from . import secrets
-from .API_calls import get_to_dos
-from .API_calls import clean_input
+'''from .secrets import course_codes, Google_email, Google_password, phone_number'''
+
+from API_calls import get_to_dos
+from API_calls import clean_input
+from secrets import Google_email, Google_password, phone_number, course_codes
 import re
 
 
@@ -18,8 +20,6 @@ def split_messages(email_message: str) -> list:
     # and is above the threshold for a new message a new message will be added
     for i, _ in enumerate(email_message):
         if i % 140 + offset > 100 + offset and i in newline_indexes:
-            print(f'i = {i}')
-            print(email_message[j:i])
             messages.append(email_message[j:i])
             j = i
             offset += 140
@@ -30,8 +30,8 @@ def split_messages(email_message: str) -> list:
     return messages
 
 
- # get to-do output from API_class module and cleans the output
-to_do = get_to_dos(course_codes=secrets.course_codes)
+# get to-do output from API_class module and cleans the output
+to_do = get_to_dos(course_codes=course_codes)
 email_message = clean_input(to_do)
 
 
@@ -45,7 +45,6 @@ if __name__ == '__main__':
     port = 465
 
 
-
     messages = split_messages(email_message=email_message)
 
     # add newlines to the start of each message to avoid the addition of 
@@ -56,8 +55,8 @@ if __name__ == '__main__':
 
     # using ssl login to the gmail server and send a message 
     with smtplib.SMTP_SSL(smtp, port, context=ssl.create_default_context()) as email:
-        email.login(secrets.Google_email, secrets.Google_password)
+        email.login(Google_email, Google_password)
         # sender, receiver, message
         for message in messages:
             if len(message) > 1:
-                email.sendmail(secrets.Google_email, secrets.phone_number, message)
+                email.sendmail(Google_email, phone_number, message)
