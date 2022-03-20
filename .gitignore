@@ -155,7 +155,7 @@ cython_debug/
 secrets.py
 
 # ignore testing file 
-test.py
+tests/
 
 # ignore vscode 
 .vscode/

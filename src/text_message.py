@@ -15,14 +15,18 @@ email_message = clean_input(to_do)
 messages = []
 count = 0
 
-# splits the messages into multiple oens to stay below the character limit on text messages 
-for i,character in enumerate(email_message):
-    if i % 100 > 80 and character == '\n' and count == 0:
-        messages.append(email_message[0:i])
-        j = i
-        count += 1
-    if i % 100 > 80 and character == '\n' and count == 1:
-        messages.append(email_message[j:i])
+def split_messages(email_message):
+    # splits the messages into multiple oens to stay below the character limit on text messages 
+    for i,character in enumerate(email_message):
+        if i % 100 > 80 and character == '\n' and count == 0:
+            messages.append(email_message[0:i])
+            j = i
+            count += 1
+        if i % 100 > 80 and character == '\n' and count == 1:
+            messages.append(email_message[j:i])
+    return messages
+
+messages = split_messages(email_message=email_message)
 
 # add newlines to the start of each message to avoid the addition of 
 # X-CMAE envelope to the text messages
