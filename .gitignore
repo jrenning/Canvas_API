@@ -157,5 +157,8 @@ secrets.py
 # ignore inits
 __init__.py
 
+# ignore test 
+test.py
+
 # ignore vscode 
 .vscode/

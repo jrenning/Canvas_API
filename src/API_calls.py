@@ -1,14 +1,11 @@
 from collections import defaultdict
+'''from .secrets import API_TOKEN, course_codes'''
 from secrets import API_TOKEN, course_codes
 
 import re
 import requests
 import datetime
 
-
-
-# import datetime
-# import pytz
 
 
 def get_calender_links() -> dict:
@@ -84,31 +81,23 @@ def get_to_dos(course_codes: dict) -> dict:
 
 def clean_input(response_dictionary: dict) -> str:
 
-    master_assignments_dict = {}
-
-    # groups courses with their assignments in a more parsable fromat
-    for course in course_codes.keys():
-        full_output = response_dictionary[course]
-        values = [*full_output.values()]
-        keys = [full_output.keys()]
-        master_assignments_dict.update({course: [keys, values]})
+    master_assignments_list = []
     
+    # append each course along with the assignments and due dates to a list in order 
+    for course_name in course_codes.keys():
+        master_assignments_list.append( course_name + ':')
+        for k, v in response_dictionary[course_name].items():
+            master_assignments_list.append(str(k))
+            master_assignments_list.append(str(v))
 
-    # transform output into a string and remove unnecessary characters
-    formatted_output = str(master_assignments_dict)
-    patterns = ['{','}',"'", 'dict_keys','\[','\]','\(','\)']
+    # take out brackets and apostrophes from date format to allow for parsing into readable format
+    patterns = ["'","\[","\]"]
+    for i, _ in enumerate(master_assignments_list):
+        for pattern in patterns:
+            master_assignments_list[i] = re.sub(pattern, "", master_assignments_list[i])
 
-    # takes out special characters from the output
-    for pattern in patterns:
-        formatted_output = re.sub(pattern, "", formatted_output)
 
-    # splits up output base on commas to get courses seperated 
-    formatted_output = re.sub(",", "\n", formatted_output)
-
-    # extra space for matching iso-8 format, don't remove!!
-    formatted_list = re.split('\n ', formatted_output)
-    
-    for i, input in enumerate(formatted_list):
+    for i, input in enumerate(master_assignments_list):
         # matches on ISO-8 time formats 
         if re.search('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?', input):
             initial_time = datetime.datetime.strptime(input, "%Y-%m-%dT%H:%M:%S%z")
@@ -122,23 +111,21 @@ def clean_input(response_dictionary: dict) -> str:
                 new_output = final_time.strftime(' %a %b %d %H:%Mpm')
             else:
                 new_output = initial_time.strftime(' %a %b %d %H:%Mam')
- 
-            formatted_list[i] = new_output
+
+            master_assignments_list[i] = new_output
+
+
+    final_string = ''
+
+    # concatonate the assignments into one string
+    for record in master_assignments_list:
+        final_string += record
+
+    # split up lines after courses, then after assignments
+    final_string = re.sub('(\D:)','\\1\n',final_string)
+    final_string = re.sub('([0-9]{2}pm|[0-9]{2}am)', '\\1\n', final_string)
     
-    # make the list a string 
-    formatted_output = ' '.join(str(input) for input in formatted_list)
-    
-    # create new lines when it reaches the end of a subject
-    formatted_output = re.sub("(\w:) ", "\\1\n", formatted_output)
-    
-    # creates a new line when it reaches the end of an assignment, using the time format 
-    formatted_output = re.sub("(:\d[0-9]+am|pm) ", "\\1\n", formatted_output)
-    
-    # takes out extra spaces from lines without assignments before them 
-    formatted_output = re.sub("(:\\n)  ", "\\1", formatted_output)
-    
-   
-    return formatted_output
+    return final_string
 
 
 if __name__ == "__main__":
