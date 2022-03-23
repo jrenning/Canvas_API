@@ -1,5 +1,4 @@
 from collections import defaultdict
-'''from .secrets import API_TOKEN, course_codes'''
 from secrets import API_TOKEN, course_codes
 
 import re

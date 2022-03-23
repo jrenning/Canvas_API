@@ -6,44 +6,42 @@ from API_calls import clean_input
 from secrets import Google_email, Google_password, phone_number, course_codes
 import re
 
-'''from .API_calls import get_to_dos
-from .API_calls import clean_input
-from .secrets import Google_email, Google_password, phone_number, course_codes'''
+
 
 
 
 def split_messages(email_message: str) -> list:
-    newline_indexes = [m.start() for m in re.finditer('\\n', email_message)]
-    newline_indexes = newline_indexes[::-1]
-    print(f'newline indexes = {newline_indexes}')
-    messages = []
-    j = 0
-    mod_offset = 0
-    threshold_offset = 0
+    
+    # find all newlines to find points at which to break up the message
+    newline_indices = [m.start() for m in re.finditer('\\n', email_message)]
 
-    # if index is under the 140 character limit, it contains a newline, 
-    # and is above the threshold for a new message a new message will be added
-    for i, _ in enumerate(email_message):
-        if i % (140+mod_offset) > 90+threshold_offset and i in newline_indexes:
-            print(f"i = {i}")
-            messages.append(email_message[j:i])
-            j = i
-            mod_offset += 140
-            threshold_offset += 130
-            
-    else: 
-        # adds any parts of the message that the 
-        messages.append(email_message[j:len(email_message)])
+    chosen_newline_indices = []
+    messages = []
+
+
+    # starting count at limit of message length
+    count = 140
+
+    # loops through the message and starts looking for the most optimal newlines to cut at (ie closest to the 140 limit)
+    # counts down from the limit until an index is found, 
+    # adds the index to a list of chosen indexes then adds the indexes value to the limit and counts down again
+    for counter, _ in enumerate(email_message):
+        for index in newline_indices:
+            if index == count:
+                chosen_newline_indices.append(index)
+                count = 140 + index
+        count -= 1
+
+    # starting index value
+    i = 0
+
+    # makes messages from chosen newline indices
+    for index in chosen_newline_indices:
+        messages.append(email_message[i: index])
+        i = index
+
             
     return messages
-
-
-# get to-do output from API_class module and cleans the output
-to_do = get_to_dos(course_codes=course_codes)
-email_message = clean_input(to_do)
-
-
-
 
 
 
@@ -53,6 +51,8 @@ if __name__ == '__main__':
     smtp = "smtp.gmail.com"
     port = 465
 
+    to_do = get_to_dos(course_codes)
+    email_message = clean_input(to_do)
 
     messages = split_messages(email_message=email_message)
 
