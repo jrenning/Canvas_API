@@ -1,14 +1,16 @@
+import re
 import smtplib
 import ssl
+from secrets import Google_email, Google_password, course_codes, phone_number
 
-from API_calls import get_to_dos
-from API_calls import clean_input
-from secrets import Google_email, Google_password, phone_number, course_codes
-import re
+from API_calls import clean_input, get_to_dos
 
+'''from .API_calls import get_to_dos
+from .API_calls import clean_input
+from .secrets import Google_email, Google_password, phone_number, course_codes'''
 
-
-
+to_do = get_to_dos(course_codes)
+email_message = clean_input(to_do)
 
 def split_messages(email_message: str) -> list:
     

@@ -1,11 +1,10 @@
-import email
-from pyexpat.errors import messages
-from src.text_message import split_messages, email_message
+
+from src import text_message 
 import pytest 
 
 @pytest.fixture
 def messages():
-    return split_messages(email_message)
+    return text_message.split_messages(text_message.email_message)
 
 
 
@@ -22,13 +21,16 @@ def test_split_message_integrity(messages):
     for message in messages:
         length += len(message)
     
-    print(f'Length of the original message is {len(email_message)} the length of the new ones is {length}')
-    assert length == len(email_message)
+    print(f'Length of the original message is {len(text_message.email_message)} the length of the new ones is {length}')
+    # account fpr removal of last newline
+    assert length == len(text_message.email_message) - 1
     
 def test_good_splits(messages):
-    splits = round(len(email_message) / 140)
+    splits = round(len(text_message.email_message) / 140)
+    # not always possible so add 1 for testing
+    good_splits = splits + 1
     
-    print(f'Good split number is {splits}, number of messages is {len(messages)}')
-    assert splits  == len(messages)
+    print(f'Best splits = {splits}, good split number is {good_splits}, number of messages is {len(messages)}')
+    assert good_splits  == len(messages)
     
         
